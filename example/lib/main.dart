@@ -42,7 +42,6 @@ class _MyAppState extends State<MyApp> {
     // setState to update our non-existent appearance.
     if (!mounted) return;
 
-    print("0000000000");
     DailyPedometer.stepCountStream.listen(_onStepCount);
 
     setState(() {

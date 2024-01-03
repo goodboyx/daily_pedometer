@@ -1,7 +1,7 @@
 name: daily_pedometer
-description: "A new Flutter plugin project."
+description: "A Pedometer and Step Detection package for Android and iOS. Step count is streamed as the platform updates it."
 version: 0.0.1
-homepage:
+homepage: https://github.com/ganer9r/daily_pedometer
 
 environment:
   sdk: '>=3.2.3 <4.0.0'
