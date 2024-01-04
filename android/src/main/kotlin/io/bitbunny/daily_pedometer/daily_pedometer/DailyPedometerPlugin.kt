@@ -19,7 +19,7 @@ class DailyPedometerPlugin: FlutterPlugin {
     stepCountChannel = EventChannel(flutterPluginBinding.binaryMessenger, "daily_step_count")
 
     /// Create handlers
-    val stepCountHandler = SensorStreamHandler(flutterPluginBinding, Sensor.TYPE_STEP_COUNTER)
+    val stepCountHandler = SensorStreamHandler(flutterPluginBinding)
 
     /// Set handlers
     stepCountChannel.setStreamHandler(stepCountHandler)

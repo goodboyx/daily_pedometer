@@ -16,21 +16,19 @@ class SensorStreamHandler() : EventChannel.StreamHandler {
     private var sensorManager: SensorManager? = null
     private var sensor: Sensor? = null
     private lateinit var context: Context
-    private lateinit var sensorName: String
     private lateinit var flutterPluginBinding: FlutterPlugin.FlutterPluginBinding
 
-    constructor(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding, sensorType: Int) : this() {
+    constructor(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) : this() {
         this.context = flutterPluginBinding.applicationContext
-        this.sensorName = if (sensorType == Sensor.TYPE_STEP_COUNTER) "StepCount" else "StepDetection"
         sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        sensor = sensorManager!!.getDefaultSensor(sensorType)
+        sensor = sensorManager!!.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
         this.flutterPluginBinding = flutterPluginBinding
     }
 
     override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
         if (sensor == null) {
-            events!!.error("1", "$sensorName not available",
-                    "$sensorName is not available on this device");
+            events!!.error("1", "StepCount not available",
+                    "StepCount is not available on this device");
         } else {
             sensorEventListener = sensorEventListener(events!!);
             sensorManager!!.registerListener(sensorEventListener,
