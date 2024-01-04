@@ -50,15 +50,11 @@ class _MyAppState extends State<MyApp> {
     // setState to update our non-existent appearance.
     if (!mounted) return;
 
-    DailyPedometer.stepCountStream.listen(_onStepCount);
-
-    setState(() {
-      _platformVersion = "test";
+    DailyPedometer.stepCountStream.listen((event) async {
+      setState(() {
+        _platformVersion = " ${event.steps} 걸음이다앗!";
+      });
     });
-  }
-
-  Future<void> _onStepCount(StepCount event) async {
-    print(event);
   }
 
   @override
@@ -155,25 +151,23 @@ void onStart(ServiceInstance service) async {
     service.stopSelf();
   });
 
+  flutterLocalNotificationsPlugin.show(
+    888,
+    'COOL SERVICE',
+    'Awesome ${DateTime.now()}',
+    const NotificationDetails(
+      android: AndroidNotificationDetails(
+        'my_foreground',
+        'MY FOREGROUND SERVICE',
+        icon: 'ic_launcher',
+        ongoing: true,
+      ),
+    ),
+  );
+
   DailyPedometer.stepCountStream.listen((event) async {
     if (service is AndroidServiceInstance) {
       if (await service.isForegroundService()) {
-        /// OPTIONAL for use custom notification
-        /// the notification id must be equals with AndroidConfiguration when you call configure() method.
-        flutterLocalNotificationsPlugin.show(
-          888,
-          'COOL SERVICE',
-          'Awesome ${DateTime.now()}',
-          const NotificationDetails(
-            android: AndroidNotificationDetails(
-              'my_foreground',
-              'MY FOREGROUND SERVICE',
-              icon: 'ic_bg_service_small',
-              ongoing: true,
-            ),
-          ),
-        );
-
         // if you don't using custom notification, uncomment this
         service.setForegroundNotificationInfo(
           title: "걸음이다앗!",
