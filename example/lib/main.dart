@@ -155,8 +155,7 @@ void onStart(ServiceInstance service) async {
     service.stopSelf();
   });
 
-  // bring to foreground
-  Timer.periodic(const Duration(seconds: 1), (timer) async {
+  DailyPedometer.stepCountStream.listen((event) async {
     if (service is AndroidServiceInstance) {
       if (await service.isForegroundService()) {
         /// OPTIONAL for use custom notification
@@ -177,21 +176,10 @@ void onStart(ServiceInstance service) async {
 
         // if you don't using custom notification, uncomment this
         service.setForegroundNotificationInfo(
-          title: "My App Service",
-          content: "Updated at ${DateTime.now()}",
+          title: "걸음이다앗!",
+          content: event.toString(),
         );
       }
     }
-
-    /// you can see this log in logcat
-    print('FLUTTER BACKGROUND SERVICE: ${DateTime.now()}');
-
-    service.invoke(
-      'update',
-      {
-        "current_date": DateTime.now().toIso8601String(),
-        "device": "1234",
-      },
-    );
   });
 }
