@@ -25,7 +25,6 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   String _platformVersion = 'Unknown';
-  final _dailyPedometerPlugin = DailyPedometer();
 
   @override
   void initState() {
@@ -50,9 +49,9 @@ class _MyAppState extends State<MyApp> {
     // setState to update our non-existent appearance.
     if (!mounted) return;
 
-    DailyPedometer.stepCountStream.listen((event) async {
+    DailyPedometer().stepCountStream.listen((event) async {
       setState(() {
-        _platformVersion = " ${event.steps} 걸음이다앗!";
+        _platformVersion = " ${event} 걸음이다앗!";
       });
     });
   }
@@ -73,7 +72,10 @@ class _MyAppState extends State<MyApp> {
 }
 
 Future<void> initializeService() async {
+  if (!Platform.isAndroid) return;
+
   final service = FlutterBackgroundService();
+  service.invoke("stopService");
 
   /// OPTIONAL, using custom notification channel id
   const AndroidNotificationChannel channel = AndroidNotificationChannel(
@@ -130,12 +132,7 @@ Future<void> initializeService() async {
 
 @pragma('vm:entry-point')
 void onStart(ServiceInstance service) async {
-  // Only available for flutter 3.0.0 and later
   DartPluginRegistrant.ensureInitialized();
-
-  /// OPTIONAL when use custom notification
-  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
 
   if (service is AndroidServiceInstance) {
     service.on('setAsForeground').listen((event) {
@@ -151,27 +148,22 @@ void onStart(ServiceInstance service) async {
     service.stopSelf();
   });
 
-  flutterLocalNotificationsPlugin.show(
-    888,
-    'COOL SERVICE',
-    'Awesome ${DateTime.now()}',
-    const NotificationDetails(
-      android: AndroidNotificationDetails(
-        'my_foreground',
-        'MY FOREGROUND SERVICE',
-        icon: 'ic_launcher',
-        ongoing: true,
-      ),
-    ),
-  );
+  DailyPedometer pedometer = DailyPedometer();
+  pedometer.setMode(true);
+  pedometer.stepCountStream.listen((event) async {
+    // 여기서 push 처리 하는게 더 좋지만 현재는 백그라운드 제어 불가능..
+  });
 
-  DailyPedometer.stepCountStream.listen((event) async {
+  // 나중에 백그라운드 제어가 되면, 이 부분을 제거하고 DailyPedometer.stepCountStream.listen( 에서 처리하면 좋음!
+  Timer.periodic(const Duration(seconds: 1), (timer) async {
     if (service is AndroidServiceInstance) {
       if (await service.isForegroundService()) {
+        int step = pedometer.steps;
+
         // if you don't using custom notification, uncomment this
         service.setForegroundNotificationInfo(
-          title: "걸음이다앗!",
-          content: event.toString(),
+          title: '걸음수보다 더 크게 수익 쌓는 앱테크',
+          content: '오늘의 걸음수 : $step',
         );
       }
     }

@@ -9,9 +9,10 @@ import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.EventChannel
 import android.os.Handler
+import android.util.Log
+import java.time.LocalDateTime
 
 class SensorStreamHandler() : EventChannel.StreamHandler {
-
     private var sensorEventListener: SensorEventListener? = null
     private var sensorManager: SensorManager? = null
     private var sensor: Sensor? = null

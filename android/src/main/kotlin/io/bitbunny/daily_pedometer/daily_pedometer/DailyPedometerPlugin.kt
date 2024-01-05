@@ -1,11 +1,7 @@
 package io.bitbunny.daily_pedometer.daily_pedometer
 
-import android.hardware.Sensor
-import androidx.annotation.NonNull
-
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.EventChannel
-import android.hardware.SensorEventListener
 import android.util.Log
 
 /** DailyPedometerPlugin */
