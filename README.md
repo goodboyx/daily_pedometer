@@ -10,9 +10,15 @@ I measure my step count daily. Supports Android only
 
 # Example Usage 
 ```
-DailyPedometer.stepCountStream.listen(_onStepCount);
+See the [example app](https://github.com/ganer9r/daily_pedometer/blob/main/example/lib/main.dart) for a fully-fledged example.
 
-Future<void> _onStepCount(StepCount event) async {
-  print(event);
-}
+Below is shown a more generalized example. Remember to set the required permissions, as described above. This may require you to manually allow the permission in the "Settings" on the phone.
+
+
+DailyPedometer().stepCountStream.listen((event) async {
+  setState(() {
+    _platformVersion = " ${event} daily steps";
+  });
+});
+
 ```

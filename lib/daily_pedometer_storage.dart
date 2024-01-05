@@ -1,9 +1,10 @@
 import 'dart:convert';
 
 import 'package:daily_pedometer/daily_pedometer.dart';
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class DailyPerometerStorage {
+class DailyPedometerStorage {
   final storageKey = 'STEPS';
 
   checkPreviousDate(steps, StepCount event) {
@@ -49,7 +50,7 @@ class DailyPerometerStorage {
       steps["stack"].add(steps["todayStepCount"]);
     }
 
-    print("PerometerStorage : ${steps}");
+    debugPrint("PerometerStorage : ${steps}");
     return steps;
   }
 
