@@ -49,7 +49,12 @@ class _MyAppState extends State<MyApp> {
     // setState to update our non-existent appearance.
     if (!mounted) return;
 
-    DailyPedometer().stepCountStream.listen((event) async {
+    DailyPedometer pedometer = await DailyPedometer.create();
+    setState(() {
+      _platformVersion = " ${pedometer.steps} 걸음이다앗!";
+    });
+
+    pedometer.stepCountStream.listen((event) async {
       setState(() {
         _platformVersion = " ${event} 걸음이다앗!";
       });
@@ -71,6 +76,7 @@ class _MyAppState extends State<MyApp> {
   }
 }
 
+const notificationChannelId = 'my_foreground';
 Future<void> initializeService() async {
   if (!Platform.isAndroid) return;
 
@@ -79,7 +85,7 @@ Future<void> initializeService() async {
 
   /// OPTIONAL, using custom notification channel id
   const AndroidNotificationChannel channel = AndroidNotificationChannel(
-    'my_foreground', // id
+    notificationChannelId, // id
     'MY FOREGROUND SERVICE', // title
     description:
         'This channel is used for important notifications.', // description
@@ -112,7 +118,7 @@ Future<void> initializeService() async {
       autoStart: true,
       isForegroundMode: true,
 
-      notificationChannelId: 'my_foreground',
+      notificationChannelId: notificationChannelId,
       initialNotificationTitle: 'AWESOME SERVICE',
       initialNotificationContent: 'Initializing',
       foregroundServiceNotificationId: 888,
@@ -133,39 +139,79 @@ Future<void> initializeService() async {
 @pragma('vm:entry-point')
 void onStart(ServiceInstance service) async {
   DartPluginRegistrant.ensureInitialized();
+  print("111111 : 11");
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
 
   if (service is AndroidServiceInstance) {
     service.on('setAsForeground').listen((event) {
+      print("111111 : 1");
       service.setAsForegroundService();
     });
 
     service.on('setAsBackground').listen((event) {
+      print("111111 : 2");
       service.setAsBackgroundService();
     });
   }
 
   service.on('stopService').listen((event) {
+    print("111111 : 3");
     service.stopSelf();
   });
 
-  DailyPedometer pedometer = DailyPedometer();
-  pedometer.setMode(true);
-  pedometer.stepCountStream.listen((event) async {
-    // 여기서 push 처리 하는게 더 좋지만 현재는 백그라운드 제어 불가능..
-  });
+  if (service is AndroidServiceInstance) {
+    DailyPedometer pedometer = await DailyPedometer.create();
+    print("DailyPedometer foregrondService ${pedometer.steps}");
+
+    flutterLocalNotificationsPlugin.show(
+      888,
+      'test steps',
+      'today steps : ${pedometer.steps}',
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+            notificationChannelId, notificationChannelId,
+            icon: 'ic_bg_service_small', ongoing: true),
+      ),
+    );
+
+    pedometer.setMode(true);
+    pedometer.stepCountStream.listen((event) async {
+      // 여기서 push 처리 하는게 더 좋지만 현재는 백그라운드 제어 불가능..
+      flutterLocalNotificationsPlugin.show(
+        888,
+        'test steps',
+        'today steps : $event',
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+              notificationChannelId, notificationChannelId,
+              icon: 'ic_bg_service_small', ongoing: true),
+        ),
+      );
+    });
+
+    // pedometer.setMode(true);
+    // pedometer.stepCountStream.listen((event) async {
+    //   // 여기서 push 처리 하는게 더 좋지만 현재는 백그라운드 제어 불가능..
+    //   service.setForegroundNotificationInfo(
+    //     title: 'test steps',
+    //     content: 'today steps : $event',
+    //   );
+    // });
+  }
 
   // 나중에 백그라운드 제어가 되면, 이 부분을 제거하고 DailyPedometer.stepCountStream.listen( 에서 처리하면 좋음!
-  Timer.periodic(const Duration(seconds: 1), (timer) async {
-    if (service is AndroidServiceInstance) {
-      if (await service.isForegroundService()) {
-        int step = pedometer.steps;
+  // if (service is AndroidServiceInstance) {
+  //   if (!await service.isForegroundService()) return;
 
-        // if you don't using custom notification, uncomment this
-        service.setForegroundNotificationInfo(
-          title: '걸음수보다 더 크게 수익 쌓는 앱테크',
-          content: '오늘의 걸음수 : $step',
-        );
-      }
-    }
-  });
+  //   Timer.periodic(const Duration(seconds: 1), (timer) async {
+  //     int step = pedometer.steps;
+
+  //     // if you don't using custom notification, uncomment this
+  //     service.setForegroundNotificationInfo(
+  //       title: '${timer}',
+  //       content: 'today steps : $step',
+  //     );
+  //   });
+  // }
 }

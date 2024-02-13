@@ -5,7 +5,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 class DailyPedometer {
-  final EventChannel _stepCountChannel = const EventChannel('daily_step_count');
+  static final EventChannel _stepCountChannel =
+      const EventChannel('daily_step_count');
   final DailyPedometerStorage storage = DailyPedometerStorage();
 
   bool _isWriteMode = false;
@@ -13,12 +14,19 @@ class DailyPedometer {
   dynamic _storageSteps;
   DateTime? _lastEventTime;
 
+  static create() async {
+    var pedometer = DailyPedometer();
+    await pedometer.initialized();
+    return pedometer;
+  }
+
   Stream<int> get stepCountStream {
     return _stepCountChannel.receiveBroadcastStream().asyncMap((event) async {
       StepCount stepCount = StepCount._(event);
 
       if (_isWriteMode) {
         saveStepCount(stepCount);
+        _storageSteps ??= await storage.read();
       } else {
         await getStorageSteps(stepCount);
       }
@@ -26,6 +34,16 @@ class DailyPedometer {
       _step = await getSteps(stepCount);
       return _step;
     });
+  }
+
+  Future<void> initialized() async {
+    _storageSteps = await storage.read();
+    if (_storageSteps["todayStepCount"] != null) {
+      StepCount stepCount = StepCount._(_storageSteps["todayStepCount"]);
+      _step = await getSteps(stepCount);
+
+      print("DailyPedometer initialized $_step");
+    }
   }
 
   int get steps {
@@ -73,8 +91,7 @@ class DailyPedometer {
   }
 
   getSteps(StepCount stepCount) async {
-    if (_storageSteps != null &&
-        stepCount.getDateAsString() == _storageSteps["todayDate"]) {
+    if (stepCount.getDateAsString() == _storageSteps["todayDate"]) {
       if (!_storageSteps.containsKey("stack")) {
         _storageSteps["stack"] = [];
       }
