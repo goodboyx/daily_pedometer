@@ -69,6 +69,11 @@ class DailyPedometerStorage {
     await preferences.reload();
   }
 
+  remove() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    await preferences.remove(storageKey);
+  }
+
   read() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     // dynamic testData = {
