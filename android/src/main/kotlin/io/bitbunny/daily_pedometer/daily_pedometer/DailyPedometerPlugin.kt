@@ -7,6 +7,7 @@ import android.util.Log
 /** DailyPedometerPlugin */
 class DailyPedometerPlugin: FlutterPlugin {
   private lateinit var stepCountChannel: EventChannel
+  private lateinit var stepCountHandler: SensorStreamHandler
 
   override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     Log.d("DailyPedometerPlugin", "onAttachedToEngine called");
@@ -15,15 +16,16 @@ class DailyPedometerPlugin: FlutterPlugin {
     stepCountChannel = EventChannel(flutterPluginBinding.binaryMessenger, "daily_step_count")
 
     /// Create handlers
-    val stepCountHandler = SensorStreamHandler(flutterPluginBinding)
+    stepCountHandler = SensorStreamHandler(flutterPluginBinding)
 
     /// Set handlers
     stepCountChannel.setStreamHandler(stepCountHandler)
 
-    
+
   }
 
   override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
     stepCountChannel.setStreamHandler(null)
+    stepCountHandler.dispose()
   }
 }
