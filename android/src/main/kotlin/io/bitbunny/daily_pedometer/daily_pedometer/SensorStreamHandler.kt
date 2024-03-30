@@ -38,6 +38,10 @@ class SensorStreamHandler() : EventChannel.StreamHandler {
     }
 
     override fun onCancel(arguments: Any?) {
+        dispose();
+    }
+
+    fun dispose() {
         sensorManager!!.unregisterListener(sensorEventListener);
     }
 
