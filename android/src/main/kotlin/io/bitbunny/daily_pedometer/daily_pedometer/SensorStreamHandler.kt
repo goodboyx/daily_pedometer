@@ -15,15 +15,11 @@ import java.time.LocalDateTime
 class SensorStreamHandler() : EventChannel.StreamHandler {
     private var sensorEventListener: SensorEventListener? = null
     private var sensorManager: SensorManager? = null
-    private var sensor: Sensor? = null
-    private lateinit var context: Context
-    private lateinit var flutterPluginBinding: FlutterPlugin.FlutterPluginBinding
+    private var sensor: Sensor? = null    
 
-    constructor(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) : this() {
-        this.context = flutterPluginBinding.applicationContext
-        sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        sensor = sensorManager!!.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
-        this.flutterPluginBinding = flutterPluginBinding
+    constructor(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) : this() {        
+        sensorManager = flutterPluginBinding.applicationContext.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        sensor = sensorManager!!.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)        
     }
 
     override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
