@@ -17,9 +17,8 @@ class SensorStreamHandler() : EventChannel.StreamHandler {
     private var sensorManager: SensorManager? = null
     private var sensor: Sensor? = null    
 
-    constructor(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) : this() {
-        context = flutterPluginBinding.applicationContext
-        sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+    constructor(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) : this() {        
+        sensorManager = flutterPluginBinding.applicationContext.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         sensor = sensorManager!!.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)        
     }
 
