@@ -1,12 +1,11 @@
 import 'dart:async';
-
+import 'dart:io';
 import 'package:daily_pedometer/daily_pedometer_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 class DailyPedometer {
-  static final EventChannel _stepCountChannel =
-      const EventChannel('daily_step_count');
+  static final EventChannel _stepCountChannel = Platform.isAndroid ? EventChannel('daily_step_count') : EventChannel('step_count');
   final DailyPedometerStorage storage = DailyPedometerStorage();
 
   bool _isWriteMode = false;
@@ -22,12 +21,16 @@ class DailyPedometer {
 
   Stream<int> get stepCountStream {
     return _stepCountChannel.receiveBroadcastStream().asyncMap((event) async {
+
       StepCount stepCount = StepCount._(event);
 
       if (_isWriteMode) {
-        saveStepCount(stepCount);
         _storageSteps ??= await storage.read();
       } else {
+        if(Platform.isIOS)
+        {
+          saveStepCount(stepCount);
+        }
         await getStorageSteps(stepCount);
       }
 
@@ -52,6 +55,7 @@ class DailyPedometer {
 
   void setMode(bool isWriteMode) {
     _isWriteMode = isWriteMode;
+    print("DailyPedometer setMode $_isWriteMode");
   }
 
   Timer? _debounceTimer;
