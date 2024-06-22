@@ -27,10 +27,10 @@ class DailyPedometer {
       if (_isWriteMode) {
         _storageSteps ??= await storage.read();
       } else {
-        if(Platform.isIOS)
-        {
+        // if(Platform.isIOS)
+        // {
           saveStepCount(stepCount);
-        }
+        // }
         await getStorageSteps(stepCount);
       }
 
